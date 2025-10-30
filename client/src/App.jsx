@@ -26,7 +26,7 @@ const App = () => {
         <Route path='generate-images' element={<GenerateImage />} />
         <Route path='remove-background' element={<RemoveBackground />} />
         <Route path='remove-object' element={<RemoveObjects />} />
-        <Route path='review-cv' element={<ReviweCV />} />
+        <Route path='review-resume' element={<ReviweCV />} />
         <Route path='community' element={<Community />} />
       </Route>
     </Routes>
