@@ -10,9 +10,19 @@ import RemoveBackground from './pages/RemoveBackground'
 import RemoveObjects from './pages/RemoveObjects'
 import ReviweCV from './pages/ReviweCV'
 import Community from './pages/Community'
+import { useAuth } from '@clerk/clerk-react'
+import { useEffect } from 'react'
+
 
 
 const App = () => {
+
+  const {getToken} = useAuth()
+
+  useEffect(()=>{
+    getToken().then((token)=>console.log(token));
+  },[])
+
   return (
     <Routes>
       
