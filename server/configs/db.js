@@ -1,6 +1,13 @@
-import {neon} from '@neondatabase/serverless'
+import mongoose from 'mongoose';
 
-const sql = neon(`${process.env.DATABASE_URL}`);
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log('MongoDB Connected');
+    } catch (error) {
+        console.error('MongoDB connection error:', error.message);
+        process.exit(1);
+    }
+};
 
-
-export default sql;
+export default connectDB;

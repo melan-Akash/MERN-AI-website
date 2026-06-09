@@ -1,36 +1,26 @@
-import { clerkClient } from "@clerk/express";
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-// Middleware to check userId and hasPremiumPlan
-
-
-
-export const auth = async (req,res,next) =>{
+export const auth = async (req, res, next) => {
     try {
-        const {userId, has} = await req.auth();
-        const hasPremiumPlan = await has({
-            plan: 'premium'
-        });
-
-        const user = await clerkClient.users.getUser(userId)
-
-        if(!hasPremiumPlan && user.privateMetadata.free_usage){
-            req.free_usage = user.privateMetadata.free_usage
-        } else {
-            await clerkClient.users.updateUserMetadata(userId, {
-                privateMetadata:{ 
-                free_usage: 0 
-                }
-
-                
-            })
-            req.free_usage = 0;
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ success: false, message: 'No token provided' });
         }
-        req.plan = hasPremiumPlan ? 'premium' : 'free'
-        next()
 
-    } catch (error) {
-        res.json({success : false, message: error.message})
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
-    }
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Invalid token user' });
+        }
 
-}
+        req.user = user;
+        req.plan = user.plan;
+        req.free_usage = user.free_usage;
+        next();
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+};
