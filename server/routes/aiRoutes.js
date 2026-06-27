@@ -13,8 +13,9 @@ import {
 } from '../controllers/aiController.js';
 import { auth } from '../middleware/auth.js';
 import multer from 'multer';
+import os from 'os';
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: os.tmpdir() });
 
 const aiRouter = express.Router();
 
