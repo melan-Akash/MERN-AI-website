@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { Heart } from 'lucide-react'
 import axios from 'axios'
+import { toast } from 'react-hot-toast'
 
 const Community = () => {
 
@@ -18,7 +19,7 @@ const Community = () => {
   }
 
   const handleLike = async (id) => {
-    if (!user) return alert('Please login to like');
+    if (!user) return toast.error('Please login to like');
     try {
       const { data } = await axios.post(`${backendUrl}/api/ai/creations/${id}/like`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('ai_token')}` }

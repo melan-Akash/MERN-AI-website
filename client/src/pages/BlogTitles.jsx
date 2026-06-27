@@ -36,9 +36,10 @@ const BlogTitles = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
-    if (!token) return alert('Please sign in first');
+    if (!token) return toast.error('Please sign in first');
     setLoading(true);
     setResult('');
+    const loadToast = toast.loading('Generating titles...');
     try {
       const { data } = await axios.post(`${backendUrl}/api/ai/generate-blog-titles`, {
         keyword: input,
@@ -49,11 +50,15 @@ const BlogTitles = () => {
 
       if (data.success) {
         setResult(data.content);
+        toast.dismiss(loadToast);
+        toast.success('Titles generated successfully!');
       } else {
-        alert(data.message);
+        toast.dismiss(loadToast);
+        toast.error(data.message);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to generate titles');
+      toast.dismiss(loadToast);
+      toast.error(error.response?.data?.message || 'Failed to generate titles');
     } finally {
       setLoading(false);
     }

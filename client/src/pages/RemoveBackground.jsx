@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
+import { toast } from 'react-hot-toast'
 
 const RemoveBackground = () => {
 
@@ -24,11 +25,12 @@ const RemoveBackground = () => {
   
   const onSubmitHandler = async (e) => {
     e.preventDefault()
-    if (!token) return alert('Please sign in first');
-    if (!input) return alert('Please upload an image');
+    if (!token) return toast.error('Please sign in first');
+    if (!input) return toast.error('Please upload an image');
 
     setLoading(true);
     setResult('');
+    const loadToast = toast.loading('Removing background...');
     try {
       const formData = new FormData();
       formData.append('image', input);
@@ -42,11 +44,15 @@ const RemoveBackground = () => {
 
       if (data.success) {
         setResult(data.content);
+        toast.dismiss(loadToast);
+        toast.success('Background removed successfully!');
       } else {
-        alert(data.message);
+        toast.dismiss(loadToast);
+        toast.error(data.message);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to remove background');
+      toast.dismiss(loadToast);
+      toast.error(error.response?.data?.message || 'Failed to remove background');
     } finally {
       setLoading(false);
     }

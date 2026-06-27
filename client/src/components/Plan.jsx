@@ -1,18 +1,19 @@
 import React, { useState } from 'react'
-import { Check, Zap, Crown, Rocket } from 'lucide-react'
+import { Check, Zap, Crown, Rocket, Shield, Sparkles } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
+import { toast } from 'react-hot-toast'
 
 const plans = [
   {
     name: 'Free',
     price: { monthly: 0, yearly: 0 },
-    icon: Zap,
-    color: 'from-[#64748B] to-[#94A3B8]',
+    icon: Shield,
+    color: 'from-gray-500 to-slate-600',
     description: 'Get started with basic AI tools',
     features: [
-      '10 AI generations per month',
-      'Write articles (basic)',
+      '10 AI generations / month',
+      'Write articles & essays',
       'Generate blog titles',
       'Community access',
       'Standard support',
@@ -24,38 +25,40 @@ const plans = [
       'Resume review',
       'Priority support',
     ],
-    cta: 'Get Started Free',
+    cta: 'Get Started',
     popular: false,
   },
   {
     name: 'Pro',
     price: { monthly: 19, yearly: 15 },
-    icon: Crown,
-    color: 'from-[#3C81F6] to-[#9234EA]',
+    icon: Sparkles,
+    color: 'from-blue-500 to-indigo-600',
     description: 'Everything you need to create amazing content',
     features: [
-      '100 AI generations per month',
-      'Write articles (advanced)',
+      '100 AI generations / month',
+      'Write articles & essays',
       'Generate blog titles',
       'AI Image generation',
       'Background removal',
       'Object removal',
-      'Resume review',
-      'Community posting',
+      'Community sharing',
       'Priority support',
     ],
-    notIncluded: [],
-    cta: 'Start Pro Plan',
+    notIncluded: [
+      'Team collaboration',
+      'Custom integrations',
+    ],
+    cta: 'Upgrade to Pro',
     popular: true,
   },
   {
     name: 'Enterprise',
     price: { monthly: 49, yearly: 39 },
     icon: Rocket,
-    color: 'from-[#F59E0B] to-[#EF4444]',
+    color: 'from-purple-500 to-pink-600',
     description: 'Unlimited power for teams & businesses',
     features: [
-      'Unlimited AI generations',
+      'Unlimited generations',
       'All Pro features',
       'Team collaboration',
       'API access',
@@ -81,6 +84,7 @@ const Plan = () => {
     }
     if (plan.name === 'Free') return
     
+    const loadingToast = toast.loading('Redirecting to Stripe Checkout...');
     try {
       const { data } = await axios.post(`${backendUrl}/api/user/create-checkout-session`, {
         planId: plan.name.toLowerCase(),
@@ -92,11 +96,13 @@ const Plan = () => {
       if (data.success && data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.message || 'Payment initiation failed');
+        toast.dismiss(loadingToast);
+        toast.error(data.message || 'Payment initiation failed');
       }
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || 'Failed to connect to payment gateway');
+      toast.dismiss(loadingToast);
+      toast.error(error.response?.data?.message || 'Failed to connect to payment gateway');
     }
   }
 

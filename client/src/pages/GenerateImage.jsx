@@ -1,8 +1,8 @@
-import { Image, Sparkle, Copy, Check, Download } from 'lucide-react'
 import React, { useState } from 'react'
-
+import { Sparkle, Image, Copy, Check, Download } from 'lucide-react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
+import { toast } from 'react-hot-toast'
 
 const GenerateImage = () => {
   const imageStyle = [
@@ -27,6 +27,7 @@ const GenerateImage = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(result);
     setCopied(true);
+    toast.success('Link copied to clipboard!');
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -36,9 +37,10 @@ const GenerateImage = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
-    if (!token) return alert('Please sign in first');
+    if (!token) return toast.error('Please sign in first');
     setLoading(true);
     setResult('');
+    const loadToast = toast.loading('Generating image...');
     try {
       const { data } = await axios.post(`${backendUrl}/api/ai/generate-image`, {
         prompt: input,
@@ -50,11 +52,15 @@ const GenerateImage = () => {
 
       if (data.success) {
         setResult(data.content);
+        toast.dismiss(loadToast);
+        toast.success('Image generated successfully!');
       } else {
-        alert(data.message);
+        toast.dismiss(loadToast);
+        toast.error(data.message);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to generate image');
+      toast.dismiss(loadToast);
+      toast.error(error.response?.data?.message || 'Failed to generate image');
     } finally {
       setLoading(false);
     }

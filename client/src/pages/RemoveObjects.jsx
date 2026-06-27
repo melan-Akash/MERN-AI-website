@@ -1,11 +1,11 @@
 import { Scissors, Sparkles, Copy, Check, Download } from 'lucide-react'
 import React, { useState } from 'react'
-
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
+import { toast } from 'react-hot-toast'
 
 const RemoveObjects = () => {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(null)
   const [object, setObject] = useState('')
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,11 +24,12 @@ const RemoveObjects = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
-    if (!token) return alert('Please sign in first');
-    if (!input || !object) return alert('Please upload an image and describe the object');
+    if (!token) return toast.error('Please sign in first');
+    if (!input || !object) return toast.error('Please upload an image and describe the object');
 
     setLoading(true);
     setResult('');
+    const loadToast = toast.loading('Removing object...');
     try {
       const formData = new FormData();
       formData.append('image', input);
@@ -43,11 +44,15 @@ const RemoveObjects = () => {
 
       if (data.success) {
         setResult(data.content);
+        toast.dismiss(loadToast);
+        toast.success('Object removed successfully!');
       } else {
-        alert(data.message);
+        toast.dismiss(loadToast);
+        toast.error(data.message);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to remove object');
+      toast.dismiss(loadToast);
+      toast.error(error.response?.data?.message || 'Failed to remove object');
     } finally {
       setLoading(false);
     }

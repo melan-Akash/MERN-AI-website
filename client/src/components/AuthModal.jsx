@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { X, Mail, Lock, User, Eye, EyeOff, Sparkles } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
+import { toast } from 'react-hot-toast'
 
 const AuthModal = () => {
   const { showAuthModal, closeSignIn, login, backendUrl } = useAuth()
@@ -24,11 +25,16 @@ const AuthModal = () => {
 
       if (data.success) {
         login(data.user, data.token)
+        toast.success(isLogin ? 'Successfully signed in!' : 'Account created successfully!')
+        closeSignIn()
       } else {
         setError(data.message)
+        toast.error(data.message)
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.')
+      const errMsg = err.response?.data?.message || 'Something went wrong. Please try again.';
+      setError(errMsg)
+      toast.error(errMsg)
     } finally {
       setLoading(false)
     }
