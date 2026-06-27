@@ -7,7 +7,7 @@ import { CheckCircle, XCircle } from 'lucide-react'
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { token, checkAuth } = useAuth()
+  const { token, checkAuth, backendUrl } = useAuth()
   const [status, setStatus] = useState('verifying')
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const PaymentSuccess = () => {
       }
 
       try {
-        const { data } = await axios.post('http://localhost:5000/api/user/verify-payment', {
+        const { data } = await axios.post(`${backendUrl}/api/user/verify-payment`, {
           session_id: sessionId,
           plan: plan
         }, {

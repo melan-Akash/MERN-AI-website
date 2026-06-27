@@ -72,7 +72,7 @@ const plans = [
 
 const Plan = () => {
   const [yearly, setYearly] = useState(false)
-  const { user, openSignIn } = useAuth()
+  const { user, openSignIn, backendUrl } = useAuth()
 
   const handlePlanClick = async (plan) => {
     if (!user) {
@@ -82,7 +82,7 @@ const Plan = () => {
     if (plan.name === 'Free') return
     
     try {
-      const { data } = await axios.post('http://localhost:5000/api/user/create-checkout-session', {
+      const { data } = await axios.post(`${backendUrl}/api/user/create-checkout-session`, {
         planId: plan.name.toLowerCase(),
         isYearly: yearly
       }, {
@@ -116,7 +116,7 @@ const Plan = () => {
           <button
             onClick={() => setYearly(!yearly)}
             className={`relative w-12 h-6 rounded-full transition-colors duration-300 cursor-pointer ${
-              yearly ? 'bg-gradient-to-r from-[#3C81F6] to-[#9234EA]' : 'bg-gray-300'
+              yearly ? 'bg-linear-to-r from-[#3C81F6] to-[#9234EA]' : 'bg-gray-300'
             }`}
           >
             <div
@@ -150,14 +150,14 @@ const Plan = () => {
               }`}
             >
               {plan.popular && (
-                <div className='absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#3C81F6] to-[#9234EA] text-white text-xs font-bold px-4 py-1 rounded-full'>
+                <div className='absolute -top-3 left-1/2 -translate-x-1/2 bg-linear-to-r from-[#3C81F6] to-[#9234EA] text-white text-xs font-bold px-4 py-1 rounded-full'>
                   Most Popular
                 </div>
               )}
 
               {/* Icon & Name */}
               <div className='flex items-center gap-3 mb-3'>
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center`}>
+                <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${plan.color} flex items-center justify-center`}>
                   <Icon className='w-5 h-5 text-white' />
                 </div>
                 <h3 className='text-lg font-bold text-slate-700'>{plan.name}</h3>
@@ -185,7 +185,7 @@ const Plan = () => {
                   isCurrentPlan
                     ? 'bg-gray-100 text-gray-400 cursor-default'
                     : plan.popular
-                    ? 'bg-gradient-to-r from-[#3C81F6] to-[#9234EA] text-white hover:opacity-90 active:scale-95'
+                    ? 'bg-linear-to-r from-[#3C81F6] to-[#9234EA] text-white hover:opacity-90 active:scale-95'
                     : 'border border-gray-300 text-gray-700 hover:bg-gray-50 active:scale-95'
                 }`}
               >

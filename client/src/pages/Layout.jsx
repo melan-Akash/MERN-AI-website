@@ -11,38 +11,52 @@ const Layout = () => {
   const { user, openSignIn } = useAuth()
 
   return user ? (
-    <div className='flex flex-col items-start justify-start h-screen'>
-      <nav className='w-full px-8 min-h-16 flex items-center justify-between border-b border-gray-200 bg-white'>
-        <div onClick={() => navigate('/')} className='flex items-center gap-2 cursor-pointer'>
-          <Sparkles className='w-6 h-6 text-[#5044E5] fill-[#5044E5]' />
-          <span className='text-xl font-bold text-gray-800 tracking-tight'>Do with Ai</span>
+    <div className='flex flex-col items-start justify-start h-screen w-screen overflow-hidden bg-slate-50'>
+      <nav className='w-full px-8 h-16 flex items-center justify-between border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50'>
+        <div onClick={() => navigate('/')} className='flex items-center gap-2.5 cursor-pointer group'>
+          <div className='p-1.5 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl shadow-md shadow-indigo-100 group-hover:scale-105 transition-transform duration-200'>
+            <Sparkles className='w-5 h-5 text-white fill-white/20' />
+          </div>
+          <span className='text-lg font-bold tracking-tight bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent'>Do with Ai</span>
         </div>
-        {
-          sidebar ? <X onClick={() => setSidebar(false)} className='h-6 w-6 text-gray-700 sm:hidden'/>
-          : <Menu onClick={() => setSidebar(true)} className='w-6 h-6 text-gray-700 sm:hidden'/>
-        }
+        <div className='flex items-center gap-4'>
+          {
+            sidebar ? (
+              <button onClick={() => setSidebar(false)} className='p-2 hover:bg-slate-100 rounded-xl transition sm:hidden cursor-pointer'>
+                <X className='h-5 w-5 text-slate-600'/>
+              </button>
+            ) : (
+              <button onClick={() => setSidebar(true)} className='p-2 hover:bg-slate-100 rounded-xl transition sm:hidden cursor-pointer'>
+                <Menu className='w-5 h-5 text-slate-600'/>
+              </button>
+            )
+          }
+        </div>
       </nav>
-      <div className='flex-1 w-full flex h-[clac(100vh-64px)]'>
+      <div className='flex-1 w-full flex h-[calc(100vh-64px)] overflow-hidden relative'>
         <Sidebar sidebar={sidebar} setSidebar={setSidebar}/>
-        <div className='flex-1 bg-[#F4F7FB]'>
+        <div className='flex-1 bg-slate-50/50 overflow-hidden relative'>
+          <div className='w-full h-full overflow-y-auto custom-scrollbar animate-fade-in'>
             <Outlet />
+          </div>
         </div>
-
       </div>
-      
-
-
     </div> 
   ) : (
-    <div className='flex flex-col items-center justify-center h-screen gap-4'>
-      <p className='text-gray-500 text-lg'>Please sign in to access the AI tools</p>
-      <button
-        onClick={openSignIn}
-        className='bg-gradient-to-r from-[#3C81F6] to-[#9234EA] text-white px-8 py-2.5 rounded-full
-        hover:opacity-90 transition cursor-pointer'
-      >
-        Sign In
-      </button>
+    <div className='flex flex-col items-center justify-center h-screen w-screen bg-slate-50 gap-6 px-4 text-center'>
+      <div className='p-4 bg-white rounded-3xl shadow-xl shadow-indigo-50 border border-slate-100 max-w-sm w-full flex flex-col items-center gap-4 animate-scale-up'>
+        <div className='p-3.5 bg-linear-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-100'>
+          <Sparkles className='w-8 h-8 text-white' />
+        </div>
+        <h2 className='text-xl font-bold text-slate-800'>Welcome to Do with Ai</h2>
+        <p className='text-slate-500 text-sm leading-relaxed'>Please sign in to access the full suite of AI tools and start creating.</p>
+        <button
+          onClick={openSignIn}
+          className='w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-2xl font-semibold hover:shadow-lg hover:shadow-indigo-100 hover:opacity-95 transition-all cursor-pointer'
+        >
+          Sign In
+        </button>
+      </div>
     </div>
   )
 }

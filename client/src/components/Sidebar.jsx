@@ -10,7 +10,8 @@ import {
   Scissors,
   SquarePen,
   Users,
-  Sparkles
+  Sparkles,
+  User
 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
@@ -31,94 +32,102 @@ const Sidebar = ({ sidebar, setSidebar }) => {
 
   return (
     <div
-      className={`w-60 bg-white border-r border-gray-200 
-      flex flex-col justify-between items-center max-sm:absolute top-16 bottom-0 z-40
+      className={`w-64 bg-white border-r border-slate-100 flex flex-col justify-between h-full max-sm:fixed top-16 bottom-0 left-0 z-40
       ${sidebar ? 'translate-x-0' : 'max-sm:-translate-x-full'}
-      transition-all duration-300 ease-in-out`}
+      transition-transform duration-300 ease-in-out`}
     >
-      <div className='w-full'>
-        {/* Logo Section inside Sidebar for Mobile */}
-        <div className='sm:hidden flex items-center justify-center gap-2 py-6 border-b border-gray-100 cursor-pointer' onClick={() => {navigate('/'); setSidebar(false);}}>
-          <Sparkles className='w-6 h-6 text-[#5044E5] fill-[#5044E5]' />
-          <span className='text-xl font-bold text-gray-800 tracking-tight'>Do with Ai</span>
-        </div>
-
-      {/* User Info and Navigation */}
-      <div className='my-7 w-full'>
+      <div className='flex-1 flex flex-col overflow-y-auto custom-scrollbar py-6 px-4'>
+        {/* User Info Header in Sidebar */}
         {user && (
-          <>
-            {user.imageUrl ? (
-              <img
-                src={user.imageUrl}
-                alt=''
-                className='w-14 h-14 rounded-full mx-auto cursor-pointer object-cover'
-                onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + user.fullName + '&background=5044E5&color=fff'; }}
-              />
-            ) : (
-               <div className='w-14 h-14 rounded-full mx-auto bg-[#5044E5] text-white flex items-center justify-center font-bold text-2xl'>
-                 {user.fullName?.charAt(0)?.toUpperCase()}
-               </div>
-            )}
-            <h1 className='mt-2 text-center text-gray-700 font-medium'>
-              {user.fullName}
-            </h1>
-
-            <div className='mt-8 flex flex-col gap-1 px-4'>
-              {navItems.map(({ to, label, Icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={to === '/ai'}
-                  onClick={() => setSidebar(false)}
-                  className={({ isActive }) =>
-                    `px-3.5 py-2.5 flex items-center gap-3 rounded-lg transition-all duration-200 ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#3C81F6] to-[#9234EA] text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : ''}`} />
-                      <span>{label}</span>
-                    </>
-                  )}
-                </NavLink>
-              ))}
+          <div className='mb-6 px-2 py-4 bg-slate-50/50 rounded-2xl border border-slate-100 flex flex-col items-center text-center'>
+            <div className='relative group mb-3'>
+              <div className='absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-300'></div>
+              {user.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  alt=''
+                  className='relative w-16 h-16 rounded-full object-cover border-2 border-white shadow-md'
+                  onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + user.name + '&background=5044E5&color=fff'; }}
+                />
+              ) : (
+                <div className='relative w-16 h-16 rounded-full bg-linear-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center border-2 border-white shadow-md'>
+                  <User className='w-7 h-7 text-white/90' />
+                </div>
+              )}
             </div>
-          </>
+            <h1 className='text-sm font-bold text-slate-800 tracking-tight'>
+              {user.name}
+            </h1>
+            <p className='text-xs font-medium text-indigo-600 mt-0.5 bg-indigo-50 px-2.5 py-0.5 rounded-full capitalize'>
+              {user.plan === 'premium' ? '★ Premium' : 'Free Plan'}
+            </p>
+          </div>
         )}
+
+        {/* Navigation Items */}
+        <nav className='flex flex-col gap-1'>
+          {navItems.map(({ to, label, Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/ai'}
+              onClick={() => setSidebar(false)}
+              className={({ isActive }) =>
+                `px-4 py-3 flex items-center gap-3.5 rounded-xl font-medium text-sm transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-linear-to-r from-indigo-50 to-purple-50 text-indigo-600 border border-indigo-100/50 shadow-sm shadow-indigo-100/10'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className={`p-1 rounded-lg transition-colors ${
+                    isActive ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                  }`}>
+                    <Icon className='w-4 h-4' />
+                  </div>
+                  <span>{label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
       </div>
 
-      {/* Footer - Plan and Logout */}
+      {/* Footer Profile & Logout */}
       {user && (
-        <div className='w-full border-t border-gray-200 p-4 px-6 flex items-center justify-between'>
-          <div className='flex gap-2 items-center cursor-pointer max-w-[150px]'>
+        <div className='p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between gap-3 shrink-0'>
+          <div className='flex gap-2.5 items-center overflow-hidden flex-1'>
             {user.imageUrl ? (
-               <img src={user.imageUrl} alt='' className='w-8 h-8 rounded-full object-cover shrink-0' 
-               onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + user.fullName + '&background=5044E5&color=fff'; }}
-               />
+              <img 
+                src={user.imageUrl} 
+                alt='' 
+                className='w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0' 
+                onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + user.name + '&background=5044E5&color=fff'; }}
+              />
             ) : (
-               <div className='w-8 h-8 rounded-full shrink-0 bg-[#5044E5] text-white flex items-center justify-center font-bold text-xs'>
-                 {user.fullName?.charAt(0)?.toUpperCase()}
-               </div>
+              <div className='w-9 h-9 rounded-full shrink-0 bg-indigo-600 text-white flex items-center justify-center border border-white/10 shadow-sm'>
+                <User className='w-4.5 h-4.5 text-white/95' />
+              </div>
             )}
-            <div className='overflow-hidden'>
-              <h1 className='text-sm font-medium truncate'>{user.fullName}</h1>
-              <p className='text-xs text-gray-500 capitalize'>
-                {user.plan === 'premium' ? 'Premium' : 'Free'} Plan
+            <div className='overflow-hidden flex-1'>
+              <h2 className='text-xs font-bold text-slate-800 truncate'>{user.name}</h2>
+              <p className='text-[10px] font-semibold text-slate-400 uppercase tracking-wider'>
+                {user.plan === 'premium' ? 'Premium' : 'Free'}
               </p>
             </div>
           </div>
 
-          <LogOut
+          <button
             onClick={() => signOut()}
-            className='w-4.5 text-gray-400 hover:text-gray-700 transition cursor-pointer'
-          />
+            className='p-2 hover:bg-rose-50 hover:text-rose-600 text-slate-400 rounded-xl transition cursor-pointer group shrink-0'
+            title="Log Out"
+          >
+            <LogOut className='w-4 h-4 transition-transform group-hover:translate-x-0.5' />
+          </button>
         </div>
       )}
-      </div>
     </div>
   )
 }

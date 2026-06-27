@@ -17,6 +17,15 @@ const creationSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
+    },
+    isPublic: {
+        type: Boolean,
+        default: false,
+    },
+    likes: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'User',
+        default: [],
     }
 }, { timestamps: true });
 

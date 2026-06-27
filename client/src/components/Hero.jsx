@@ -98,7 +98,7 @@ export default function Hero() {
               }}
             >
               Creating Amazing<br />
-              <span className="bg-gradient-to-br from-white via-white to-[#5044E5] bg-clip-text text-transparent">
+              <span className="bg-linear-to-br from-white via-white to-primary bg-clip-text text-transparent">
                 Content with AI
               </span><br />
               In Seconds
@@ -151,7 +151,7 @@ export default function Hero() {
                     <span className="text-white font-medium">98%</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800/50">
-                    <div className="h-full w-[98%] rounded-full bg-gradient-to-r from-white to-zinc-400" />
+                    <div className="h-full w-[98%] rounded-full bg-linear-to-r from-white to-zinc-400" />
                   </div>
                 </div>
 

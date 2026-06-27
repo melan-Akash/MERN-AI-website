@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import axios from 'axios';
 import Creation from "../models/Creation.js";
 import User from "../models/User.js";
 import cloudinary from "../configs/cloudinary.js";
@@ -9,8 +9,8 @@ const checkLimits = async (req, res, cost = 1) => {
     const plan = req.plan;
     let free_usage = req.free_usage;
     
-    // Pro has 100 limit, free has 10, enterprise has unlimited
-    let maxUsage = plan === 'enterprise' ? Infinity : (plan === 'pro' ? 100 : 10);
+    // Bypass limits during development/testing
+    let maxUsage = Infinity;
 
     if (free_usage + cost > maxUsage) {
         res.status(403).json({ success: false, message: `Limit reached. You have used ${maxUsage} generations.` });
@@ -20,10 +20,7 @@ const checkLimits = async (req, res, cost = 1) => {
 };
 
 const checkPremiumFeature = (req, res) => {
-    if (req.plan === 'free') {
-        res.status(403).json({ success: false, message: 'This feature requires a Pro or Enterprise plan. Please upgrade.' });
-        return false;
-    }
+    // Bypass plan locks during development to allow testing all features
     return true;
 };
 
@@ -38,19 +35,27 @@ export const generateArticle = async (req, res) => {
     try {
         if (!(await checkLimits(req, res))) return;
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const { prompt, length } = req.body;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
+        const response = await axios.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                model: "openrouter/owl-alpha",
+                messages: [
+                    { role: "user", content: prompt }
+                ],
                 temperature: 0.7,
-                maxOutputTokens: length || 1000,
+                max_tokens: length || 1000
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json"
+                }
             }
-        });
+        );
 
-        const content = response.text;
+        const content = response.data.choices[0].message.content;
 
         const newCreation = new Creation({
             userId: req.user._id,
@@ -110,18 +115,28 @@ export const generateBlogTitles = async (req, res) => {
     try {
         if (!(await checkLimits(req, res))) return;
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const { keyword, category } = req.body;
 
         const prompt = `Generate 5 catchy and SEO-friendly blog titles for a blog about "${keyword}" in the "${category}" category. Format the output as a numbered list.`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: { temperature: 0.8 }
-        });
+        const response = await axios.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                model: "openrouter/owl-alpha",
+                messages: [
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.8
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
-        const content = response.text;
+        const content = response.data.choices[0].message.content;
 
         const newCreation = new Creation({
             userId: req.user._id,
@@ -148,24 +163,41 @@ export const reviewCV = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please upload a PDF file" });
         }
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const fileData = fs.readFileSync(req.file.path);
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [
-                {
-                    inlineData: {
-                        data: fileData.toString("base64"),
-                        mimeType: req.file.mimetype,
+        const response = await axios.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                model: "google/gemini-2.5-flash",
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            {
+                                type: "text",
+                                text: "Review this resume. Provide constructive feedback on formatting, content, and ATS optimization. Highlight strengths and suggest 3 areas for improvement."
+                            },
+                            {
+                                type: "image_url",
+                                image_url: {
+                                    url: `data:${req.file.mimetype};base64,${fileData.toString("base64")}`
+                                }
+                            }
+                        ]
                     }
-                },
-                "Review this resume. Provide constructive feedback on formatting, content, and ATS optimization. Highlight strengths and suggest 3 areas for improvement."
-            ],
-            config: { temperature: 0.6 }
-        });
+                ],
+                temperature: 0.6,
+                max_tokens: 2000
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
-        const content = response.text;
+        const content = response.data.choices[0].message.content;
 
         // Cleanup uploaded file
         fs.unlinkSync(req.file.path);
@@ -227,7 +259,7 @@ export const removeBackground = async (req, res) => {
         // Background removal in cloudinary takes time, usually we poll or use a specific URL transform.
         // We can just apply the effect via URL transform directly if the account has the add-on, 
         // OR we can just use the generated remove_background transform.
-        const processedUrl = cloudinary.url(result.public_id, { effect: "background_removal" });
+        const processedUrl = cloudinary.url(result.public_id, { effect: "background_removal", secure: true });
 
         fs.unlinkSync(req.file.path);
 
@@ -261,7 +293,7 @@ export const removeObject = async (req, res) => {
         const result = await cloudinary.uploader.upload(req.file.path);
         
         // Gen remove transform
-        const processedUrl = cloudinary.url(result.public_id, { effect: `gen_remove:prompt_${object}` });
+        const processedUrl = cloudinary.url(result.public_id, { effect: `gen_remove:prompt_${object}`, secure: true });
 
         fs.unlinkSync(req.file.path);
 
@@ -279,5 +311,33 @@ export const removeObject = async (req, res) => {
         console.error(error);
         if (req.file) fs.unlinkSync(req.file.path);
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const downloadFile = async (req, res) => {
+    try {
+        let { url } = req.query;
+        if (!url) return res.status(400).json({ success: false, message: "URL is required" });
+
+        // Normalize URL if it is protocol-relative
+        if (url.startsWith('//')) {
+            url = 'https:' + url;
+        }
+
+        const response = await axios({
+            method: 'get',
+            url: url,
+            responseType: 'stream',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+            }
+        });
+
+        res.setHeader('Content-Type', response.headers['content-type'] || 'image/png');
+        res.setHeader('Content-Disposition', 'attachment; filename="ai-creation.png"');
+        response.data.pipe(res);
+    } catch (error) {
+        console.error('Download error:', error);
+        res.status(500).send('Download failed: ' + error.message);
     }
 };

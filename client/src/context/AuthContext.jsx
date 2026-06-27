@@ -8,6 +8,22 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
 
+  const checkAuth = async () => {
+    const currentToken = token || localStorage.getItem('ai_token')
+    if (!currentToken) return
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${currentToken}` }
+      })
+      if (data.success) {
+        setUser(data.user)
+        localStorage.setItem('ai_user', JSON.stringify(data.user))
+      }
+    } catch (error) {
+      console.error("checkAuth error:", error)
+    }
+  }
+
   // Load persisted auth from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('ai_user')
@@ -36,8 +52,10 @@ export const AuthProvider = ({ children }) => {
   const openSignIn = () => setShowAuthModal(true)
   const closeSignIn = () => setShowAuthModal(false)
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+
   return (
-    <AuthContext.Provider value={{ user, token, login, signOut, openSignIn, closeSignIn, showAuthModal }}>
+    <AuthContext.Provider value={{ user, token, login, signOut, openSignIn, closeSignIn, showAuthModal, backendUrl, checkAuth }}>
       {children}
     </AuthContext.Provider>
   )

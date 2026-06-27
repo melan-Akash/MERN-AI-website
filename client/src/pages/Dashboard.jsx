@@ -5,13 +5,13 @@ import CreationItem from '../components/CreationItem'
 import axios from 'axios'
 
 const Dashboard = () => {
-  const { user } = useAuth()
+  const { user, backendUrl } = useAuth()
   const [creations, setCreations] = useState([])
   const [time, setTime] = useState(new Date())
 
   const getDashboardData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/ai/creations', {
+      const { data } = await axios.get(`${backendUrl}/api/ai/creations`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('ai_token')}` }
       });
       if (data.success) setCreations(data.creations);
@@ -37,77 +37,86 @@ const Dashboard = () => {
   const formattedTime = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className='h-full overflow-y-scroll p-6 md:p-10'>
+    <div className='h-full overflow-y-auto p-6 md:p-10 bg-slate-50/30'>
       
       {/* Greeting Header */}
-      <div className='mb-10 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-[url(/gradientBackground.png)] bg-cover relative overflow-hidden'>
-        <div className='relative z-10'>
-          <h1 className='text-3xl font-bold text-gray-800 mb-2'>
-            {getGreeting()}, <span className='text-[#5044E5]'>{user?.fullName?.split(' ')[0]}</span>! 👋
-          </h1>
-          <p className='text-gray-500'>Here's what's happening with your content today.</p>
-        </div>
-        <div className='flex flex-wrap items-center gap-4 relative z-10'>
-           <div className='flex items-center gap-2 text-gray-700 bg-white/70 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-sm border border-white/50'>
-             <Calendar className='w-5 h-5 text-[#5044E5]' />
-             <span className='font-medium text-sm'>{formattedDate}</span>
-           </div>
-           <div className='flex items-center gap-2 text-gray-700 bg-white/70 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-sm border border-white/50'>
-             <Clock className='w-5 h-5 text-[#5044E5]' />
-             <span className='font-medium text-sm'>{formattedTime}</span>
-           </div>
+      <div className='mb-10 p-8 rounded-3xl border border-slate-100 bg-linear-to-r from-indigo-900 via-indigo-950 to-slate-900 relative overflow-hidden shadow-xl shadow-indigo-950/5'>
+        {/* Subtle glowing mesh backgrounds */}
+        <div className='absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl -mr-20 -mt-20'></div>
+        <div className='absolute bottom-0 left-1/3 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl -mb-10'></div>
+        
+        <div className='relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6'>
+          <div>
+            <h1 className='text-3xl font-extrabold text-white mb-2 tracking-tight'>
+              {getGreeting()}, <span className='bg-linear-to-r from-indigo-200 to-purple-200 bg-clip-text text-transparent'>{user?.name?.split(' ')[0]}</span>! 👋
+            </h1>
+            <p className='text-indigo-200/70 font-medium text-sm'>Here's what's happening with your content today.</p>
+          </div>
+          <div className='flex flex-wrap items-center gap-3.5'>
+             <div className='flex items-center gap-2 text-white bg-white/10 backdrop-blur-md px-4.5 py-2.5 rounded-2xl border border-white/10 shadow-sm'>
+               <Calendar className='w-4.5 h-4.5 text-indigo-300' />
+               <span className='font-semibold text-xs tracking-wide'>{formattedDate}</span>
+             </div>
+             <div className='flex items-center gap-2 text-white bg-white/10 backdrop-blur-md px-4.5 py-2.5 rounded-2xl border border-white/10 shadow-sm'>
+               <Clock className='w-4.5 h-4.5 text-indigo-300' />
+               <span className='font-semibold text-xs tracking-wide'>{formattedTime}</span>
+             </div>
+          </div>
         </div>
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-10'>
         {/* Total Creation Card */}
-        <div className='flex justify-between items-center p-6 bg-white rounded-3xl border border-gray-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-1'>
-          <div className='text-slate-600'>
-            <p className='text-sm font-medium mb-1'>Total Creations</p>
-            <h2 className='text-3xl font-bold text-gray-800'>{creations.length}</h2>
+        <div className='group flex justify-between items-center p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5'>
+          <div>
+            <p className='text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5'>Total Creations</p>
+            <h2 className='text-3xl font-extrabold text-slate-800 tracking-tight group-hover:text-indigo-600 transition-colors'>{creations.length}</h2>
           </div>
-          <div className='w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3588F2] to-[#0BB0D7] text-white flex justify-center items-center shadow-lg shadow-blue-200'>
-            <Sparkles className='w-7 h-7 text-white' />
+          <div className='w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-50 to-purple-50 text-indigo-600 flex justify-center items-center group-hover:scale-105 transition-transform shadow-sm'>
+            <Sparkles className='w-5 h-5' />
           </div>
         </div>
 
         {/* Active Plan Card */}
-        <div className='flex justify-between items-center p-6 bg-white rounded-3xl border border-gray-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-1'>
-          <div className='text-slate-600'>
-            <p className='text-sm font-medium mb-1'>Active Plan</p>
-            <h2 className='text-3xl font-bold text-gray-800 capitalize'>
+        <div className='group flex justify-between items-center p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5'>
+          <div>
+            <p className='text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5'>Active Plan</p>
+            <span className='inline-flex items-center text-sm font-bold text-slate-800 bg-slate-100 px-3 py-1 rounded-full capitalize group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors'>
               {user?.plan || 'Free'}
-            </h2>
+            </span>
           </div>
-          <div className='w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF61C5] to-[#9E53EE] text-white flex justify-center items-center shadow-lg shadow-purple-200'>
-            <Gem className='w-7 h-7 text-white' />
+          <div className='w-12 h-12 rounded-2xl bg-linear-to-br from-amber-50 to-orange-50 text-amber-600 flex justify-center items-center group-hover:scale-105 transition-transform shadow-sm'>
+            <Gem className='w-5 h-5' />
           </div>
         </div>
         
         {/* Quick Tips Card */}
-        <div className='flex flex-col justify-center p-6 bg-gradient-to-br from-[#5044E5] to-[#7E74F1] rounded-3xl shadow-sm text-white transition-all hover:shadow-md hover:-translate-y-1'>
-           <div className='flex items-center gap-2 mb-2 opacity-80'>
-             <Sparkles className='w-4 h-4' />
-             <p className='text-sm font-medium tracking-wide uppercase'>Pro Tip</p>
+        <div className='flex flex-col justify-center p-6 bg-linear-to-br from-indigo-600 to-purple-600 rounded-3xl shadow-md shadow-indigo-100/50 text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden'>
+           <div className='absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl'></div>
+           <div className='flex items-center gap-2 mb-2 opacity-90 relative z-10'>
+             <Sparkles className='w-4 h-4 text-purple-200 fill-purple-200/20' />
+             <p className='text-[10px] font-bold tracking-wider uppercase'>Pro Tip</p>
            </div>
-           <p className='text-sm font-medium leading-relaxed'>Use specific keywords & styles for better AI blog titles and higher quality images!</p>
+           <p className='text-xs font-medium leading-relaxed opacity-95 relative z-10'>Use specific keywords & styles for better AI blog titles and higher quality images!</p>
         </div>
       </div>
 
-      <div className='space-y-4'>
-        <div className='flex items-center justify-between mb-6'>
-            <h2 className='text-xl font-bold text-gray-800'>Recent Creations</h2>
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
+            <h2 className='text-lg font-bold text-slate-800 tracking-tight'>Recent Creations</h2>
         </div>
         
         {creations.length === 0 ? (
-          <div className='text-center py-16 bg-white rounded-3xl border border-gray-100 border-dashed'>
-            <Sparkles className='w-12 h-12 text-gray-300 mx-auto mb-4' />
-            <p className='text-gray-500 font-medium'>You haven't created anything yet.</p>
-            <p className='text-sm text-gray-400 mt-1'>Start exploring the AI tools from the sidebar!</p>
+          <div className='text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 flex flex-col items-center justify-center p-6'>
+            <div className='w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100'>
+              <Sparkles className='w-7 h-7 text-slate-300' />
+            </div>
+            <p className='text-slate-700 font-bold text-base mb-1'>No creations yet</p>
+            <p className='text-sm text-slate-400 max-w-sm leading-relaxed'>Start exploring the AI tools from the sidebar to create your first content copy or image!</p>
           </div>
         ) : (
-          <div className='grid grid-cols-1 gap-4'>
-            {creations.map((item) => <CreationItem key={item.id} item={item}/>)}
+          <div className='grid grid-cols-1 gap-4 max-w-5xl'>
+            {creations.map((item) => <CreationItem key={item.id || item._id} item={item}/>)}
           </div>
         )}
       </div>

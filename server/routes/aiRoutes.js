@@ -8,7 +8,8 @@ import {
     reviewCV,
     generateImage,
     removeBackground,
-    removeObject
+    removeObject,
+    downloadFile
 } from '../controllers/aiController.js';
 import { auth } from '../middleware/auth.js';
 import multer from 'multer';
@@ -21,6 +22,7 @@ const aiRouter = express.Router();
 aiRouter.get('/creations', auth, getUserCreations);
 aiRouter.get('/creations/public', getPublicCreations); // Public community creations
 aiRouter.post('/creations/:id/like', auth, likeCreation);
+aiRouter.get('/download', downloadFile); // CORS proxy downloader
 
 // Generation routes
 aiRouter.post('/generate-article', auth, generateArticle);

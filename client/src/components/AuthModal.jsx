@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
 
 const AuthModal = () => {
-  const { showAuthModal, closeSignIn, login } = useAuth()
+  const { showAuthModal, closeSignIn, login, backendUrl } = useAuth()
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,7 @@ const AuthModal = () => {
     setLoading(true)
 
     try {
-      const endpoint = isLogin ? 'http://localhost:5000/api/auth/login' : 'http://localhost:5000/api/auth/register';
+      const endpoint = isLogin ? `${backendUrl}/api/auth/login` : `${backendUrl}/api/auth/register`;
       const { data } = await axios.post(endpoint, form);
 
       if (data.success) {
@@ -45,7 +45,7 @@ const AuthModal = () => {
       {/* Modal */}
       <div className='relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden'>
         {/* Header gradient */}
-        <div className='bg-gradient-to-r from-[#3C81F6] to-[#9234EA] p-6 text-white text-center'>
+        <div className='bg-linear-to-r from-[#3C81F6] to-[#9234EA] p-6 text-white text-center'>
           <div className='flex justify-center mb-3'>
             <Sparkles className='w-8 h-8' />
           </div>
@@ -121,7 +121,7 @@ const AuthModal = () => {
           <button
             type='submit'
             disabled={loading}
-            className='w-full bg-gradient-to-r from-[#3C81F6] to-[#9234EA] text-white py-2.5 rounded-lg text-sm font-medium
+            className='w-full bg-linear-to-r from-[#3C81F6] to-[#9234EA] text-white py-2.5 rounded-lg text-sm font-medium
             hover:opacity-90 active:scale-95 transition disabled:opacity-60 cursor-pointer'
           >
             {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
