@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
+import { toast } from 'react-hot-toast'
 
 const WriteArticle = () => {
   const { token, backendUrl } = useAuth()
@@ -21,6 +22,7 @@ const WriteArticle = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(result);
     setCopied(true);
+    toast.success('Copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -36,9 +38,10 @@ const WriteArticle = () => {
 
   const onSubmitHandler = async (e)=> {
     e.preventDefault();
-    if (!token) return alert('Please sign in first');
+    if (!token) return toast.error('Please sign in first');
     setLoading(true);
     setResult('');
+    const loadToast = toast.loading('Generating article...');
     try {
       const { data } = await axios.post(`${backendUrl}/api/ai/generate-article`, {
         prompt: input,
@@ -49,11 +52,15 @@ const WriteArticle = () => {
 
       if (data.success) {
         setResult(data.content);
+        toast.dismiss(loadToast);
+        toast.success('Article generated successfully');
       } else {
-        alert(data.message);
+        toast.dismiss(loadToast);
+        toast.error(data.message);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to generate article');
+      toast.dismiss(loadToast);
+      toast.error(error.response?.data?.message || 'Failed to generate article');
     } finally {
       setLoading(false);
     }

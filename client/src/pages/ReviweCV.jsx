@@ -1,12 +1,12 @@
 import { FileText, Sparkles, Copy, Check, Download } from 'lucide-react'
 import React, { useState } from 'react'
-
 import ReactMarkdown from 'react-markdown'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
+import { toast } from 'react-hot-toast'
 
 const ReviweCV = () => {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(null)
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -15,12 +15,13 @@ const ReviweCV = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(result);
     setCopied(true);
+    toast.success('Report copied to clipboard!');
     setTimeout(() => setCopied(false), 2000);
   }
 
   const handleDownload = () => {
     const element = document.createElement("a");
-    const file = new Blob([result], {type: 'text/plain'});
+    const file = new Blob([result], {type: 'text/markdown'});
     element.href = URL.createObjectURL(file);
     element.download = "cv-review-report.md";
     document.body.appendChild(element);
@@ -30,11 +31,12 @@ const ReviweCV = () => {
     
   const onSubmitHandler = async (e) => {
     e.preventDefault()
-    if (!token) return alert('Please sign in first');
-    if (!input) return alert('Please upload a resume');
+    if (!token) return toast.error('Please sign in first');
+    if (!input) return toast.error('Please upload a resume');
 
     setLoading(true);
     setResult('');
+    const loadToast = toast.loading('Reviewing resume...');
     try {
       const formData = new FormData();
       formData.append('resume', input);
@@ -48,11 +50,15 @@ const ReviweCV = () => {
 
       if (data.success) {
         setResult(data.content);
+        toast.dismiss(loadToast);
+        toast.success('Resume reviewed successfully!');
       } else {
-        alert(data.message);
+        toast.dismiss(loadToast);
+        toast.error(data.message);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to review resume');
+      toast.dismiss(loadToast);
+      toast.error(error.response?.data?.message || 'Failed to review resume');
     } finally {
       setLoading(false);
     }
